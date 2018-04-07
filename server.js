@@ -1,32 +1,41 @@
-var mysql = require('mysql');
-var url = require('url');
-var http = require('http');
-console.log("Running");
-var con = mysql.createConnection({
+const mysql = require('mysql');
+const url = require('url');
+const http = require('http');
+const fs = require('fs');
+
+const pw = fs.readFileSync('pw.txt')
+
+const con = mysql.createConnection({
   host: "localhost",
   user: "zachvac",
-  password: "Ooi4got2"
+  password: pw
 });
-console.log("mysql connection created");
+const favicon = fs.readFileSync('C:\\Users\\Zach\\ez\\favicon.jpg');
 con.connect(function(err) {
   if (err) throw err;
-  console.log("Connected!");
 });
 http.createServer(function (req, res) {
-
   console.log("Connected");
+  if(req.url == "/favicon.ico"){
+    res.writeHead(200,{'Content-Type':'image/jpeg'})
+    res.end(favicon,"binary");
+  }else{
     res.writeHead(200, {'Content-Type': 'text/html'});
-
     var query = url.parse(req.url, true).query.query;
-    console.log("query = "+query);
-    if(query){
-      con.query(query,function(err,result){
-        if (err) throw err;
-        console.log("Query executed");
-        res.write(JSON.stringify(result));
-        res.write("hi");
-        res.end();
-      });
-  }//end of if
+    res.write(JSON.stringify(req.headers)+"<br/>");
+    res.write(req.url);
+    res.end();
+  }//end of else
+  }).listen(80);
 
-}).listen(80);
+
+
+/*
+if(query){
+  con.query(query,function(err,result){
+    if (err) throw err;
+    res.write(JSON.stringify(result));
+    res.end();
+  });
+}
+*/
