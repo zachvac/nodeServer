@@ -10,7 +10,6 @@ http.createServer(function (req, res) {
   let folderLocation = "./"+folder;
   if(folderLookup[folder]){folderLocation = folderLookup[folder];}
   if(path.split("/")[2]=="www"){
-    console.log("www");
     const pathWithoutSlash = path.substr(1);
     const pathWithoutFolder = pathWithoutSlash.substr(pathWithoutSlash.indexOf("/"));
     fs.readFile(folderLocation+pathWithoutFolder, function(err, data) {
