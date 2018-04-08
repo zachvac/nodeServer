@@ -6,7 +6,7 @@ I'm using this to learn node.js, but also to build a functioning web server I ca
 ### To server up a static web page ###
 server/folder/www/path/page.extension
 
-### To call a node.js function###
+### To call a node.js function ###
 server/folder/data/functionName?arg1=1&arg2=2...
 
 ### folderLookup.txt ###
