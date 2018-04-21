@@ -3,55 +3,58 @@ const url = require('url');
 const http = require('http');
 const fs = require('fs');
 const port = 80;
+//folderLookup.txt contains a JSON mapping of url folder names to file system paths.
 const folderLookup = JSON.parse(fs.readFileSync("folderLookup.txt").toString());
+writeText = function(res,code,contents){
+  res.writeHead(code,{'content-Type':'text/html'});
+  res.write(contents);
+  res.end();
+}//end of writeText
+writeImage = function(res,code,contents){
+  res.writeHead(code,{'content-Type':'image/jpeg'});
+  res.write(contents);
+  res.end();
+}
 http.createServer(function (req, res) {
   const path = url.parse(req.url,true).pathname;
   const folder = path.split("/")[1];
   let folderLocation = "./"+folder;
   if(folderLookup[folder]){folderLocation = folderLookup[folder];}
   if(path.split("/")[2]=="www"){
-    const pathWithoutSlash = path.substr(1);
-    const pathWithoutFolder = pathWithoutSlash.substr(pathWithoutSlash.indexOf("/"));
+    const pathWithoutFolder = path.substr(1).substr(path.substr(1).indexOf("/"));
     fs.readFile(folderLocation+pathWithoutFolder, function(err, data) {
       if(err){
-        res.writeHead(404,{'content-Type':'text/html'});
-        res.write("404 File Not Found");
-        res.end();
+        writeText(res,404,"404 File Not Found");
       }else{
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.write(data);
-        res.end();
+        if(path.substring(path.length-3,path.length).toLowerCase()=="jpg"){
+          writeImage(res,200,data);
+        }else{
+          writeText(res,200,data);
+        }
       }
     });
   }else if(path.split("/")[2]=="data"){
-    res.writeHead(200, {'Content-Type': 'text/html'});
     try{
       const dat = require(folderLocation);
-      res.write(dat.export(path.split("/")[3],url.parse(req.url,true).query));
-      res.end();
+      writeText(res,200,dat.export(path.split("/")[3],url.parse(req.url,true).query))
     }catch(err){
-      res.writeHead(404,{'content-Type':'text/html'});
-      res.write("404 File Not Found");
-      res.end();
+      writeText(res,404,"404 File Not Found");
     }
-  }else{
-    res.writeHead(404, {'Content-Type': 'text/html'});
-    res.end("Not really sure what you're trying to do here.");
+    //hardcode in the clan war page
+  }else if(path=="/"){
+    fs.readFile("C:/Users/Zach/ez/zach/www/clashWars.html", function(err, data) {
+      if(err){
+        writeText(res,404,"404 File Not Found");
+      }else{
+        writeText(res,200,data);
+      }
+    });
+}else{
+  writeText(res,404,"Not really sure what you're trying to do here.");
   }
 }).listen(port);
 
-
-
 /*
-if(query){
-con.query(query,function(err,result){
-if (err) throw err;
-res.write(JSON.stringify(result));
-res.end();
-});
-}
-
-
 con.connect(function(err) {
 if (err) throw err;
 });
